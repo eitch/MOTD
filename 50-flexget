@@ -1,5 +1,0 @@
-#!/bin/bash
-
-echo "
-Flexget ACCEPTED:"
-tail -n 10 /home/server/.flexget/accepted.log | column -ts %
