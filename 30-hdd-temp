@@ -1,17 +1,21 @@
 #!/bin/bash
-sd=(sda sdb sdc sdd sde)
+devices=('sda' 'nvme0' 'nvme1')
 out=""
 clear="\e[0m\e[39m"
+hot_temp=45
+for device in "${devices[@]}"; do
+  if smartctl -A /dev/${device} | grep --silent "NVMe" ; then
+    temp=$(smartctl -A /dev/${device} | grep Temperature | grep Celsius | head -n1 | awk '{print $2;}')
+  else
+    temp=$(smartctl -A /dev/${device} | grep Temperature | awk '{print $10;}')
+  fi
 
-my_target_temp=45
-for i in ${!sd[@]}; do
-    temp=$(hddtemp -nq /dev/${sd[$i]} 2> /dev/null)
-    color="\e[42m"
-    if [ "$temp" -ge "${my_target_temp}" ]; then
-        color="\e[41m"
-    fi
-    out+="${sd[$i]} \e[30m $color $temp $clear ,"
-    c=i+1
+  color="\e[42m"
+  if [ "$temp" -ge "${hot_temp}" ]; then
+      color="\e[41m"
+  fi
+  out+="${device} \e[30m $color $temp $clear ,"
+  c=i+1
 done
 out+="\n"
 echo -e "
